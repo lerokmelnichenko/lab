@@ -4,14 +4,12 @@ using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
-using NetSdrClientApp.Networking;
 
 namespace NetSdrClientApp.Messages
 {
     //TODO: analyze possible use of [StructLayout] for better performance and readability 
     public static class NetSdrMessageHelper
     {
-        private static UdpClientWrapper _udpClientWrapper;
         private const short _maxMessageLength = 8191;
         private const short _maxDataItemMessageLength = 8194;
         private const short _msgHeaderLength = 2; //2 byte, 16 bit
