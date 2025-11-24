@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NetSdrClientApp.Networking
 {
-    public class UdpClientWrapper : IUdpClient
+    public class UdpClientWrapper : IUdpClient, IDisposable
     {
         private readonly IPEndPoint _localEndPoint;
         private CancellationTokenSource? _cts;
@@ -23,6 +23,12 @@ namespace NetSdrClientApp.Networking
 
         public async Task StartListeningAsync()
         {
+            if (_cts != null)
+            {
+                await _cts.CancelAsync();
+                _cts.Dispose();
+            }
+            
             _cts = new CancellationTokenSource();
             Console.WriteLine("Start listening for UDP messages...");
 
@@ -37,7 +43,7 @@ namespace NetSdrClientApp.Networking
                     Console.WriteLine($"Received from {result.RemoteEndPoint}");
                 }
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException)
             {
                 //empty
             }
@@ -52,7 +58,13 @@ namespace NetSdrClientApp.Networking
             try
             {
                 _cts?.Cancel();
+                _cts?.Dispose();
+                _cts = null;
+
                 _udpClient?.Close();
+                _udpClient?.Dispose();
+                _udpClient = null;
+                
                 Console.WriteLine("Stopped listening for UDP messages.");
             }
             catch (Exception ex)
@@ -93,6 +105,11 @@ namespace NetSdrClientApp.Networking
                        _localEndPoint.Port == other._localEndPoint.Port;
             }
             return false;
+        }
+
+        public void Dispose()
+        {
+            StopListening();
         }
     }
 }
