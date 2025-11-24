@@ -16,7 +16,7 @@ namespace NetSdrClientApp.Messages
         private const short _msgControlItemLength = 2; //2 byte, 16 bit
         private const short _msgSequenceNumberLength = 2; //2 byte, 16 bit
 
-        public enum MsgTypes
+        public enum MsgTypes : ushort
         {
             SetControlItem,
             CurrentControlItem,
@@ -28,7 +28,7 @@ namespace NetSdrClientApp.Messages
             DataItem3
         }
 
-        public enum ControlItemCodes
+        public enum ControlItemCodes : ushort
         {
             None = 0,
             IQOutputDataSampleRate = 0x00B8,
