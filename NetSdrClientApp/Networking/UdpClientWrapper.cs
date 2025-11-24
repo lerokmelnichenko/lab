@@ -84,5 +84,15 @@ namespace NetSdrClientApp.Networking
 
             return BitConverter.ToInt32(hash, 0);
         }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is UdpClientWrapper other)
+            {
+                return _localEndPoint.Address.Equals(other._localEndPoint.Address) &&
+                       _localEndPoint.Port == other._localEndPoint.Port;
+            }
+            return false;
+        }
     }
 }
