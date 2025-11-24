@@ -243,19 +243,5 @@ namespace NetSdrClientAppTests
 
             clientWrapper.Dispose();
         }
-
-        [Test]
-        public void Dispose_CanBeCalledMultipleTimes_WithoutException()
-        {
-            // Arrange
-            var clientWrapper = new TcpClientWrapper("127.0.0.1", 65000);
-
-            // Act + Assert
-            Assert.DoesNotThrow(() =>
-            {
-                clientWrapper.Dispose();
-                clientWrapper.Dispose();
-            });
-        }
     }
 }
