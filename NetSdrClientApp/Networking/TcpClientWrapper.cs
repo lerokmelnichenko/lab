@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace NetSdrClientApp.Networking
 {
-    public class TcpClientWrapper : ITcpClient
+    public class TcpClientWrapper : ITcpClient, IDisposable
     {
         private string _host;
         private int _port;
         private TcpClient? _tcpClient;
         private NetworkStream? _stream;
-        private CancellationTokenSource _cts;
+        private CancellationTokenSource? _cts;
 
         public bool Connected => _tcpClient != null && _tcpClient.Connected && _stream != null;
 
@@ -35,6 +35,9 @@ namespace NetSdrClientApp.Networking
                 Console.WriteLine($"Already connected to {_host}:{_port}");
                 return;
             }
+            
+            _cts?.Cancel();
+            _cts?.Dispose(); 
 
             _tcpClient = new TcpClient();
 
@@ -52,24 +55,41 @@ namespace NetSdrClientApp.Networking
             }
         }
 
-        public void Disconnect()
+        public void Dispose()
         {
-            if (Connected)
+            try
             {
                 _cts?.Cancel();
-                _stream?.Close();
-                _tcpClient?.Close();
-
-                _cts = null;
-                _tcpClient = null;
-                _stream = null;
-                Console.WriteLine("Disconnected.");
+                _cts?.Dispose();
+                _stream?.Dispose();
+                _tcpClient?.Dispose();
             }
-            else
+            catch
             {
-                Console.WriteLine("No active connection to disconnect.");
+                //ignore
             }
         }
+
+        public void Disconnect()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
+            }
+
+            _stream?.Close();
+            _stream?.Dispose();
+            _stream = null;
+
+            _tcpClient?.Close();
+            _tcpClient?.Dispose();
+            _tcpClient = null;
+
+            Console.WriteLine("Disconnected.");
+        }
+
 
         public async Task SendMessageAsync(byte[] data)
         {
@@ -117,7 +137,7 @@ namespace NetSdrClientApp.Networking
                         }
                     }
                 }
-                catch (OperationCanceledException ex)
+                catch (OperationCanceledException)
                 {
                     //empty
                 }
