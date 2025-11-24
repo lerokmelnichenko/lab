@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using NetSdrClientApp.Networking;
 using NUnit.Framework;
 
-namespace NetSdrClientAppTests.Networking
+namespace NetSdrClientAppTests
 {
     [TestFixture]
     [Parallelizable(ParallelScope.None)]
