@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 
 namespace EchoServer
 {
@@ -137,9 +138,9 @@ namespace EchoServer
             try
             {
                 //dummy data
-                Random rnd = new Random();
+                var rnd = RandomNumberGenerator.Create();
                 byte[] samples = new byte[1024];
-                rnd.NextBytes(samples);
+                rnd.GetBytes(samples);
                 i++;
 
                 byte[] msg = (new byte[] { 0x04, 0x84 }).Concat(BitConverter.GetBytes(i)).Concat(samples).ToArray();

@@ -88,8 +88,8 @@ namespace NetSdrClientApp.Networking
         {
             var payload = $"{nameof(UdpClientWrapper)}|{_localEndPoint.Address}|{_localEndPoint.Port}";
 
-            using var md5 = MD5.Create();
-            var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(payload));
+            using var hashProvider = SHA512.Create();
+            var hash = hashProvider.ComputeHash(Encoding.UTF8.GetBytes(payload));
 
             return BitConverter.ToInt32(hash, 0);
         }
