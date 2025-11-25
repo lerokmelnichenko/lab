@@ -54,10 +54,13 @@ namespace NetSdrClientAppTests
             wrapper.StopListening();
             await Task.WhenAny(listeningTask, Task.Delay(1000));
 
-            // Assert
-            Assert.IsTrue(signalled, "Очікували, що подія MessageReceived спрацює.");
-            Assert.IsNotNull(received, "Очікували отримати дані.");
-            CollectionAssert.AreEqual(payload, received, "Отримані байти мають збігатися з надісланими.");
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(signalled, Is.True, "Очікували, що подія MessageReceived спрацює.");
+                Assert.That(received, Is.Not.Null, "Очікували отримати дані.");
+                Assert.That(payload, Is.EqualTo(received), "Отримані байти мають збігатися з надісланими.");
+            }
         }
 
         [Test]
@@ -78,7 +81,7 @@ namespace NetSdrClientAppTests
             var completed = await Task.WhenAny(listeningTask, Task.Delay(1000)) == listeningTask;
 
             // Assert
-            Assert.IsTrue(completed, "Після StopListening цикл в StartListeningAsync має завершитись.");
+            Assert.That(completed, Is.True, "Після StopListening цикл в StartListeningAsync має завершитись.");
         }
 
         [Test]
@@ -137,9 +140,12 @@ namespace NetSdrClientAppTests
             var a = new UdpClientWrapper(port);
             var b = new UdpClientWrapper(port);
 
-            // Act + Assert
-            Assert.That(a.Equals(b), Is.True);
-            Assert.That(b.Equals(a), Is.True);
+            using (Assert.EnterMultipleScope())
+            {
+                // Act + Assert
+                Assert.That(a.Equals(b), Is.True);
+                Assert.That(b.Equals(a), Is.True);
+            }
         }
 
         [Test]
@@ -149,9 +155,12 @@ namespace NetSdrClientAppTests
             var a = new UdpClientWrapper(50000);
             var b = new UdpClientWrapper(50001);
 
-            // Act + Assert
-            Assert.That(a.Equals(b), Is.False);
-            Assert.That(b.Equals(a), Is.False);
+            using (Assert.EnterMultipleScope())
+            {
+                // Act + Assert
+                Assert.That(a.Equals(b), Is.False);
+                Assert.That(b.Equals(a), Is.False);
+            }
         }
 
         [Test]
@@ -167,9 +176,12 @@ namespace NetSdrClientAppTests
             var hash2 = a.GetHashCode(); // те саме, двічі
             var hashOther = b.GetHashCode(); // інший екземпляр, але той самий порт
 
-            // Assert
-            Assert.That(hash2, Is.EqualTo(hash1), "GetHashCode має бути стабільним для одного об'єкта.");
-            Assert.That(hashOther, Is.EqualTo(hash1), "Рівні об'єкти мають мати однаковий хеш.");
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(hash2, Is.EqualTo(hash1), "GetHashCode має бути стабільним для одного об'єкта.");
+                Assert.That(hashOther, Is.EqualTo(hash1), "Рівні об'єкти мають мати однаковий хеш.");
+            }
         }
     }
 }

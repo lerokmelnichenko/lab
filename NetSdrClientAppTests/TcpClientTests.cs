@@ -33,7 +33,7 @@ namespace NetSdrClientAppTests
             Assert.DoesNotThrow(() => client.Connect());
 
             // Assert
-            Assert.IsFalse(client.Connected);
+            Assert.That(client.Connected, Is.False);
             client.Dispose();
         }
 
@@ -54,7 +54,7 @@ namespace NetSdrClientAppTests
             await Task.Delay(100);
 
             // Assert
-            Assert.IsTrue(clientWrapper.Connected, "Після успішного підключення Connected має бути true.");
+            Assert.That(clientWrapper.Connected, Is.True, "Після успішного підключення Connected має бути true.");
 
             clientWrapper.Disconnect();
             serverClient.Close();
@@ -75,7 +75,7 @@ namespace NetSdrClientAppTests
 
             // Act + Assert
             Assert.DoesNotThrow(() => clientWrapper.Connect(), "Повторний Connect при вже активному з'єднанні не має падати.");
-            Assert.IsTrue(clientWrapper.Connected);
+            Assert.That(clientWrapper.Connected, Is.True);
 
             clientWrapper.Disconnect();
             serverClient.Close();
@@ -108,7 +108,7 @@ namespace NetSdrClientAppTests
             Assert.That(read, Is.EqualTo(payload.Length));
             var received = new byte[read];
             Array.Copy(buffer, received, read);
-            CollectionAssert.AreEqual(payload, received);
+            Assert.That(payload, Is.EqualTo(received));
 
             clientWrapper.Disconnect();
             serverClient.Close();
@@ -158,7 +158,8 @@ namespace NetSdrClientAppTests
             Assert.That(read, Is.EqualTo(expectedBytes.Length));
             var received = new byte[read];
             Array.Copy(buffer, received, read);
-            CollectionAssert.AreEqual(expectedBytes, received);
+            Assert.That(expectedBytes, Is.EqualTo(received));
+
 
             clientWrapper.Disconnect();
             serverClient.Close();
@@ -196,9 +197,10 @@ namespace NetSdrClientAppTests
             var signalled = mre.Wait(1000);
 
             // Assert
-            Assert.IsTrue(signalled, "Очікували, що подія MessageReceived спрацює.");
-            Assert.IsNotNull(received);
-            CollectionAssert.AreEqual(payload, received);
+            Assert.That(signalled, Is.True, "Очікували, що подія MessageReceived спрацює.");
+            Assert.That(received, Is.Not.Null);
+            Assert.That(payload, Is.EqualTo(received));
+
 
             clientWrapper.Disconnect();
             serverClient.Close();
@@ -216,13 +218,13 @@ namespace NetSdrClientAppTests
             var serverClient = await listener.AcceptTcpClientAsync();
 
             await Task.Delay(50);
-            Assert.IsTrue(clientWrapper.Connected);
+            Assert.That(clientWrapper.Connected, Is.True);
 
             // Act
             clientWrapper.Disconnect();
 
             // Assert
-            Assert.IsFalse(clientWrapper.Connected);
+            Assert.That(clientWrapper.Connected, Is.False);
 
             serverClient.Close();
             listener.Stop();

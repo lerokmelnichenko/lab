@@ -56,7 +56,7 @@ namespace NetSdrClientAppTests
             await Task.WhenAny(serverTask, Task.Delay(1000));
 
             // Assert
-            Assert.AreEqual(message, received);
+            Assert.That(message, Is.EqualTo(received));
         }
 
         [Test]
@@ -76,7 +76,7 @@ namespace NetSdrClientAppTests
             var completed = await Task.WhenAny(serverTask, Task.Delay(1000)) == serverTask;
 
             // Assert
-            Assert.IsTrue(completed, "Після Stop() метод StartAsync має завершитись.");
+            Assert.That(completed, Is.True, "Після Stop() метод StartAsync має завершитись.");
         }
     }
 
@@ -125,9 +125,12 @@ namespace NetSdrClientAppTests
 
             int receivedLen = completed ? receiveTask.Result : 0;
 
-            // Assert
-            Assert.IsTrue(completed, "За 2 секунди мав прилетіти хоча б один UDP пакет.");
-            Assert.Greater(receivedLen, 0, "Пакет не мав бути порожнім.");
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(completed, Is.True, "За 2 секунди мав прилетіти хоча б один UDP пакет.");
+                Assert.That(receivedLen, Is.GreaterThan(0), "Пакет не мав бути порожнім.");
+            }
         }
 
         [Test]

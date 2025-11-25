@@ -24,14 +24,17 @@ namespace NetSdrClientAppTests
             var actualLength = num - ((int)actualType << 13);
             var actualCode = BitConverter.ToInt16(codeBytes.ToArray());
 
-            //Assert
-            Assert.That(headerBytes.Count(), Is.EqualTo(2));
-            Assert.That(msg.Length, Is.EqualTo(actualLength));
-            Assert.That(type, Is.EqualTo(actualType));
+            using (Assert.EnterMultipleScope())
+            {
+                //Assert
+                Assert.That(headerBytes.Count(), Is.EqualTo(2));
+                Assert.That(msg.Length, Is.EqualTo(actualLength));
+                Assert.That(type, Is.EqualTo(actualType));
 
-            Assert.That(actualCode, Is.EqualTo((short)code));
+                Assert.That(actualCode, Is.EqualTo((short)code));
 
-            Assert.That(parametersBytes.Count(), Is.EqualTo(parametersLength));
+                Assert.That(parametersBytes.Count(), Is.EqualTo(parametersLength));
+            }
         }
 
         [Test]
@@ -51,12 +54,15 @@ namespace NetSdrClientAppTests
             var actualType = (NetSdrMessageHelper.MsgTypes)(num >> 13);
             var actualLength = num - ((int)actualType << 13);
 
-            //Assert
-            Assert.That(headerBytes.Count(), Is.EqualTo(2));
-            Assert.That(msg.Length, Is.EqualTo(actualLength));
-            Assert.That(type, Is.EqualTo(actualType));
+            using (Assert.EnterMultipleScope())
+            {
+                //Assert
+                Assert.That(headerBytes.Count(), Is.EqualTo(2));
+                Assert.That(msg.Length, Is.EqualTo(actualLength));
+                Assert.That(type, Is.EqualTo(actualType));
 
-            Assert.That(parametersBytes.Count(), Is.EqualTo(parametersLength));
+                Assert.That(parametersBytes.Count(), Is.EqualTo(parametersLength));
+            }
         }
 
         [Test]
@@ -78,11 +84,14 @@ namespace NetSdrClientAppTests
                 out var body);
 
             // Assert
-            Assert.IsTrue(success, "TranslateMessage should succeed for valid control message.");
-            Assert.That(parsedType, Is.EqualTo(type));
-            Assert.That(parsedCode, Is.EqualTo(code));
-            Assert.That(sequenceNumber, Is.EqualTo(0), "Sequence number for control item messages should stay 0.");
-            CollectionAssert.AreEqual(parameters, body, "Body should match original parameters.");
+            Assert.That(success, Is.True, "TranslateMessage should succeed for valid control message.");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(parsedType, Is.EqualTo(type));
+                Assert.That(parsedCode, Is.EqualTo(code));
+                Assert.That(sequenceNumber, Is.Zero, "Sequence number for control item messages should stay 0.");
+            }
+            Assert.That(body, Is.EqualTo(parameters), "Body should match original parameters.");
         }
 
         [Test]
@@ -110,11 +119,14 @@ namespace NetSdrClientAppTests
                 out var body);
 
             // Assert
-            Assert.IsTrue(success, "TranslateMessage should succeed for valid data message.");
-            Assert.That(parsedType, Is.EqualTo(type));
-            Assert.That(itemCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None));
-            Assert.That(sequenceNumber, Is.EqualTo(expectedSequence));
-            CollectionAssert.AreEqual(payload, body, "Body should be parameters без перших 2 байтів (sequence).");
+            Assert.That(success, Is.True, "TranslateMessage should succeed for valid data message.");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(parsedType, Is.EqualTo(type));
+                Assert.That(itemCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None));
+                Assert.That(sequenceNumber, Is.EqualTo(expectedSequence));
+            }
+            Assert.That(body, Is.EqualTo(payload), "Body should match original parameters.");
         }
 
         [Test]
@@ -144,12 +156,16 @@ namespace NetSdrClientAppTests
                 out var parsedBody);
 
             // Assert
-            Assert.IsFalse(success, "TranslateMessage should fail for unknown control item code.");
-            Assert.That(parsedType, Is.EqualTo(type));
-            Assert.That(parsedCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None),
-                "When code is unknown, itemCode should remain None.");
-            Assert.That(sequenceNumber, Is.EqualTo(0));
-            CollectionAssert.AreEqual(body, parsedBody);
+            Assert.That(success, Is.False, "TranslateMessage should fail for unknown control item code.");
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(parsedType, Is.EqualTo(type));
+                Assert.That(parsedCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None),
+                    "When code is unknown, itemCode should remain None.");
+                Assert.That(sequenceNumber, Is.Zero);
+            }
+            Assert.That(body, Is.EqualTo(parsedBody));
         }
 
         [Test]
@@ -174,9 +190,12 @@ namespace NetSdrClientAppTests
                 out var _);
 
             // Assert
-            Assert.IsFalse(success, "TranslateMessage should fail if фактична довжина не збігається з довжиною в шапці.");
-            Assert.That(parsedType, Is.EqualTo(type));
-            Assert.That(parsedCode, Is.EqualTo(code));
+            Assert.That(success, Is.False, "TranslateMessage should fail if фактична довжина не збігається з довжиною в шапці.");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(parsedType, Is.EqualTo(type));
+                Assert.That(parsedCode, Is.EqualTo(code));
+            }
         }
 
         [Test]
@@ -209,12 +228,15 @@ namespace NetSdrClientAppTests
                 out var body);
 
             // Assert
-            Assert.IsTrue(success, "Max-length data item message should still be valid.");
-            Assert.That(parsedType, Is.EqualTo(type));
-            Assert.That(itemCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None));
-            Assert.That(sequenceNumber, Is.EqualTo(seq));
-            Assert.That(body.Length, Is.EqualTo(8190), "Body length should be 8190 байт (8192 - 2 байти sequence).");
-            CollectionAssert.AreEqual(payload, body);
+            Assert.That(success, Is.True, "Max-length data item message should still be valid.");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(parsedType, Is.EqualTo(type));
+                Assert.That(itemCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None));
+                Assert.That(sequenceNumber, Is.EqualTo(seq));
+                Assert.That(body.Length, Is.EqualTo(8190), "Body length should be 8190 байт (8192 - 2 байти sequence).");
+            }
+            Assert.That(payload, Is.EqualTo(body));
         }
 
         [Test]
@@ -247,7 +269,7 @@ namespace NetSdrClientAppTests
             var samples = NetSdrMessageHelper.GetSamples(sampleSizeBits, body).ToList();
 
             // Assert
-            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, samples);
+            Assert.That(new[] { 1, 2, 3 }, Is.EqualTo(samples));
         }
 
         [Test]
@@ -266,7 +288,7 @@ namespace NetSdrClientAppTests
             var samples = NetSdrMessageHelper.GetSamples(sampleSizeBits, body).ToList();
 
             // Assert
-            CollectionAssert.AreEqual(new[] { 1, 2 }, samples);
+            Assert.That(new[] { 1, 2 }, Is.EqualTo(samples));
         }
 
         [Test]
@@ -285,7 +307,7 @@ namespace NetSdrClientAppTests
             var samples = NetSdrMessageHelper.GetSamples(sampleSizeBits, body).ToList();
 
             // Assert
-            CollectionAssert.AreEqual(new[] { 1, 2 }, samples);
+            Assert.That(new[] { 1, 2 }, Is.EqualTo(samples));
         }
 
         [Test]
@@ -306,7 +328,7 @@ namespace NetSdrClientAppTests
             var samples = NetSdrMessageHelper.GetSamples(sampleSizeBits, body).ToList();
 
             // Assert
-            CollectionAssert.AreEqual(new[] { value1, value2 }, samples);
+            Assert.That(new[] { value1, value2 }, Is.EqualTo(samples));
         }
 
         [Test]
@@ -325,7 +347,7 @@ namespace NetSdrClientAppTests
             var samples = NetSdrMessageHelper.GetSamples(sampleSizeBits, body).ToList();
 
             // Assert
-            CollectionAssert.AreEqual(new[] { 1 }, samples, "Неповний блок в кінці має ігноруватися.");
+            Assert.That(new[] { 1 }, Is.EqualTo(samples), "Неповний блок в кінці має ігноруватися.");
         }
 
         [Test]

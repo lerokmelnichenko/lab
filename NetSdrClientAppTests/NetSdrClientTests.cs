@@ -139,7 +139,7 @@ namespace NetSdrClientAppTests
             await _client.StartIQAsync();
 
             // Assert
-            Assert.IsFalse(_client.IQStarted);
+            Assert.That(_client.IQStarted, Is.False);
             _tcpClientMock.Verify(c => c.SendMessageAsync(It.IsAny<byte[]>()), Times.Never);
             _udpClientMock.Verify(c => c.StartListeningAsync(), Times.Never);
         }
@@ -154,7 +154,7 @@ namespace NetSdrClientAppTests
             await _client.StartIQAsync();
 
             // Assert
-            Assert.IsTrue(_client.IQStarted);
+            Assert.That(_client.IQStarted, Is.True);
             _tcpClientMock.Verify(c => c.SendMessageAsync(It.IsAny<byte[]>()), Times.Once);
             _udpClientMock.Verify(c => c.StartListeningAsync(), Times.Once);
         }
@@ -168,7 +168,7 @@ namespace NetSdrClientAppTests
             await _client.StopIQAsync();
 
             // Assert
-            Assert.IsFalse(_client.IQStarted);
+            Assert.That(_client.IQStarted, Is.False);
             _tcpClientMock.Verify(c => c.SendMessageAsync(It.IsAny<byte[]>()), Times.Never);
             _udpClientMock.Verify(c => c.StopListening(), Times.Never);
         }
@@ -184,7 +184,7 @@ namespace NetSdrClientAppTests
             await _client.StopIQAsync();
 
             // Assert
-            Assert.IsFalse(_client.IQStarted);
+            Assert.That(_client.IQStarted, Is.False);
             _tcpClientMock.Verify(c => c.SendMessageAsync(It.IsAny<byte[]>()), Times.Once);
             _udpClientMock.Verify(c => c.StopListening(), Times.Once);
         }
@@ -247,18 +247,21 @@ namespace NetSdrClientAppTests
             _udpMessageHandler?.Invoke(_udpClientMock.Object, udpMsg);
 
             // Assert
-            Assert.IsTrue(File.Exists("samples.bin"), "samples.bin має бути створений.");
+            Assert.That(File.Exists("samples.bin"), Is.True, "samples.bin має бути створений.");
 
             var bytes = File.ReadAllBytes("samples.bin");
 
             // принаймні 4 байти (2 short)
-            Assert.GreaterOrEqual(bytes.Length, 4, "Очікуємо хоча б 2 семпли * 2 байти.");
+            Assert.That(bytes.Length, Is.GreaterThan(4), "Очікуємо хоча б 2 семпли * 2 байти.");
 
             var sample1 = BitConverter.ToInt16(bytes, 0);
             var sample2 = BitConverter.ToInt16(bytes, 2);
 
-            Assert.That(sample1, Is.EqualTo(1));
-            Assert.That(sample2, Is.EqualTo(2));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(sample1, Is.EqualTo(1));
+                Assert.That(sample2, Is.EqualTo(2));
+            }
         }
 
     }
