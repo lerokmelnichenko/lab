@@ -1,9 +1,5 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EchoServer
 {
@@ -11,7 +7,7 @@ namespace EchoServer
     {
         private readonly int _port;
         private TcpListener _listener;
-        private CancellationTokenSource _cancellationTokenSource;
+        private readonly CancellationTokenSource _cancellationTokenSource;
 
         //constuctor
         public EchoServer(int port)
@@ -116,7 +112,8 @@ namespace EchoServer
         private readonly string _host;
         private readonly int _port;
         private readonly UdpClient _udpClient;
-        private Timer _timer;
+        private Timer? _timer;
+        private bool _disposed = false;
 
         public UdpTimedSender(string host, int port)
         {
@@ -165,8 +162,26 @@ namespace EchoServer
 
         public void Dispose()
         {
-            StopSending();
-            _udpClient.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    StopSending();
+                    _udpClient?.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
+        ~UdpTimedSender()
+        {
+            Dispose(false);
         }
     }
 }

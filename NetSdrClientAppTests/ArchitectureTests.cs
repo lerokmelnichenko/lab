@@ -1,8 +1,5 @@
-using System;
 using System.Reflection;
 using NetArchTest.Rules;
-using NetSdrClientApp;                  // тип із клієнтського застосунку
-using NUnit.Framework;
 
 namespace NetSdrClientAppTests
 {
