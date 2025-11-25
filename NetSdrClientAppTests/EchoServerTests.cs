@@ -161,7 +161,6 @@ namespace NetSdrClientAppTests
             {
                 using var sender = new UdpTimedSender("127.0.0.1", 60000);
                 sender.StartSending(100);
-                sender.Dispose(); // Dispose викличе StopSending і закриє UdpClient
             });
         }
     }
